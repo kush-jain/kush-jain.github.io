@@ -33,6 +33,11 @@ a:hover {
     text-decoration: underline;
 }
 
+a:focus {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+  }
+
 .container {
     max-width: 1100px;
     margin: 0 auto;
@@ -450,6 +455,10 @@ footer {
     .section-title {
         font-size: 1.8rem;
     }
+
+    .container {
+        padding: 0 15px;
+    }
 }
 
 @media (max-width: 480px) {
@@ -469,4 +478,79 @@ footer {
     .section-title {
         font-size: 1.6rem;
     }
+}
+
+/* For dark mode support */
+@media (prefers-color-scheme: dark) {
+    :root {
+      --primary-color: #58a6ff;
+      --secondary-color: #161b22;
+      --text-color: #c9d1d9;
+      --light-bg: #0d1117;
+      --border-color: #30363d;
+      --hover-color: #58a6ff;
+    }
+
+    body {
+      background-color: var(--secondary-color);
+    }
+  }
+
+/* Checklist Content */
+.checklist-content {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: var(--box-shadow);
+}
+
+.checklist-content ol {
+    padding-left: 20px;
+}
+
+.checklist-content ul {
+    padding-left: 20px;
+    list-style-type: disc;
+}
+
+.checklist-content li {
+    margin-bottom: 10px;
+}
+
+/* Add more spacing between checklist section headings */
+.checklist-content h3 {
+    margin-top: 50px;
+    margin-bottom: 25px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--secondary-color);
+    font-size: 1.5rem;
+}
+
+/* Special styling for the first h3 to remove extra top margin */
+.checklist-content h3:first-of-type {
+    margin-top: 20px;
+}
+
+/* Improve spacing for the intro text */
+.intro-text {
+    margin-bottom: 40px;
+}
+
+/* Add spacing between list items in the checklist for better readability */
+.checklist-content ol > li {
+    margin-bottom: 20px;
+}
+
+/* Better styling for the resource links section */
+.resource-links {
+    margin-top: 20px;
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.resource-links li {
+    margin-bottom: 15px;
 }

@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Celery Best Practices Checklist - A guide for implementing reliable Celery tasks in production">
+    <title>Celery Best Practices Checklist | Kush Jain</title>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+    <!-- Header Section -->
+    <header>
+        <div class="container">
+            <div class="profile-container">
+                <h1 class="profile-name">Celery Best Practices Checklist</h1>
+                <p class="profile-title">A guide for implementing reliable task queues in production</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav>
+        <div class="container">
+            <ul class="nav-links">
+                <li><a href="../index.html#about">About</a></li>
+                <li><a href="../index.html#projects">Projects</a></li>
+                <li><a href="../index.html#writings">Writings</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Checklist Section -->
+    <section>
+        <div class="container">
+            <div class="checklist-content">
+                <h2 class="section-title">Celery Production Checklist</h2>
+
+                <div class="intro-text">
+                    <p>A comprehensive guide to implementing and maintaining Celery task queues in production environments. </p>
+                    <p>This checklist covers implementation details, configuration strategies, deployment options, monitoring approaches, and common pitfalls.</p>
+                    <p> This is not meant as introduction to Celery - but as a final checklist for production readiness.</p>
+                </div>
+
+                <h3>Task Design & Implementation</h3>
+                <ol>
+                    <li><strong>Idempotency</strong> - Tasks should be safe to execute multiple times
+                        <ul>
+                            <li>Implement deduplication mechanisms for critical operations</li>
+                            <li>Use database transactions or locks for race condition prevention</li>
+                            <li>Design operations that can safely retry without side effects</li>
+                        </ul>
+                    </li>
+                    <li><strong>Error Handling</strong> - Robust exception handling strategies
+                        <ul>
+                            <li>Catch specific exceptions rather than broad exception types</li>
+                            <li>Log sufficient context for debugging failures</li>
+                            <li>Consider which exceptions should trigger <a href="https://docs.celeryq.dev/en/stable/userguide/tasks.html#retrying" target="_blank">retries</a> vs. permanent failures</li>
+                        </ul>
+                    </li>
+                    <li><strong>Task Serialization</strong> - Be mindful of data passed between processes
+                        <ul>
+                            <li>Pass IDs instead of entire objects when possible</li>
+                            <li>Be aware of serialization overhead with large payloads</li>
+                            <li>Consider <a href="https://docs.celeryq.dev/en/stable/userguide/calling.html#serializers" target="_blank">custom serializers</a> for performance-critical applications</li>
+                            <li>Be very careful when task signature changes - you will run into errors if not handled properly</li>
+                        </ul>
+                    </li>
+                    <li><strong>Long-running Tasks</strong> - Handle extended operations appropriately
+                        <ul>
+                            <li>Break large tasks into subtasks with <a href="https://docs.celeryq.dev/en/stable/userguide/canvas.html#groups" target="_blank"><code>group</code></a>, <a href="https://docs.celeryq.dev/en/stable/userguide/canvas.html#chords" target="_blank"><code>chord</code></a>, or <a href="https://docs.celeryq.dev/en/stable/userguide/canvas.html#chains" target="_blank"><code>chain</code></a></li>
+                            <li>Implement progress tracking mechanisms for visibility</li>
+                            <li>Consider timeout implications for extended operations</li>
+                        </ul>
+                    </li>
+                </ol>
+
+                <h3>Routing in Celery</h3>
+                <ol>
+                    <li><strong>Queues</strong> - Different queues for different types of tasks
+                        <ul>
+                            <li>Group similar tasks by resource requirements</li>
+                            <li>Create dedicated queues for priority levels</li>
+                            <li>Separate queues can also be spinned off if tasks require special error handling or retry mechanisms</li>
+                        </ul>
+                    </li>
+                    <li><strong>Workers</strong> - Routing queues to worker
+                        <ul>
+                            <li>Workers are segregated depending on the queues they are supposed to be serving. Each worker can have different execution </li>
+                            <li>Each worker can have different concurrency pool - utilise that wisely</li>
+                            <li>Each worker further can have separate scaling configuration and resource allocation</li>
+                        </ul>
+                    </li>
+                </ol>
+
+                <h3>Celery Configuration Best Practices</h3>
+                <ol>
+                    <li><strong>Task Acknowledgement</strong> - Control when tasks are marked as done
+                        <ul>
+                            <li>Set <a href="https://docs.celeryq.dev/en/stable/userguide/configuration.html#std-setting-task_acks_late" target="_blank"><code>task_acks_late=True</code></a> for critical tasks that must complete</li>
+                            <li>Understand visibility timeout implications with broker configuration</li>
+                            <li>Consider <a href="https://docs.celeryq.dev/en/stable/userguide/configuration.html#std-setting-task_reject_on_worker_lost" target="_blank"><code>task_reject_on_worker_lost=True</code></a> for automatic requeuing</li>
+                        </ul>
+                    </li>
+                    <li><strong>Worker Prefetch</strong> - Control task distribution to workers
+                        <ul>
+                            <li>Tune <a href="https://docs.celeryq.dev/en/stable/userguide/configuration.html#std-setting-worker_prefetch_multiplier" target="_blank"><code>worker_prefetch_multiplier</code></a> based on task processing time</li>
+                            <li>Lower values for long-running tasks (even 1 for very long tasks)</li>
+                            <li>Higher values for quick tasks to improve throughput</li>
+                        </ul>
+                    </li>
+                    <li><strong>Concurrency Models</strong> - Choose appropriate execution pools
+                        <ul>
+                            <li><a href="https://docs.celeryq.dev/en/stable/userguide/workers.html#concurrency" target="_blank"><code>prefork</code></a> pool for general-purpose workloads</li>
+                            <li><a href="https://docs.celeryq.dev/en/stable/userguide/concurrency/eventlet.html" target="_blank"><code>gevent</code>/<code>eventlet</code></a> for I/O-bound, high-concurrency tasks</li>
+                            <li><code>solo</code> pool for debugging or specialized environments</li>
+                            <li>Consider worker count based on CPU cores and task characteristics</li>
+                        </ul>
+                    </li>
+                    <li><strong>Result Backend</strong> - Configure based on result usage patterns
+                        <ul>
+                            <li>Disable <a href="https://docs.celeryq.dev/en/stable/userguide/configuration.html#task-result-backend-settings" target="_blank">result backend</a> if task results aren't needed</li>
+                            <li>Set appropriate <a href="https://docs.celeryq.dev/en/stable/userguide/configuration.html#std-setting-result_expires" target="_blank">expiration times</a> for task results</li>
+                            <li>Consider Redis vs. RabbitMQ vs. database backends based on needs</li>
+                        </ul>
+                    </li>
+                    <li><strong>Retry Policies</strong> - Configure intelligent retry behavior
+                        <ul>
+                            <li>Implement exponential backoff with <a href="https://docs.celeryq.dev/en/stable/userguide/tasks.html#retry-policy" target="_blank"><code>retry_backoff=True</code></a></li>
+                            <li>Set <code>max_retries</code> to prevent infinite retry loops</li>
+                            <li>Consider <code>retry_jitter=True</code> to prevent thundering herd problems</li>
+                        </ul>
+                    </li>
+                </ol>
+
+                <h3>Deployment Strategies</h3>
+                <ol>
+                    <li><strong>Kubernetes Deployment</strong> - Containerized Celery architecture
+                        <ul>
+                            <li>Use separate deployments for workers and beat schedulers</li>
+                            <li>Implement appropriate resource requests and limits</li>
+                            <li>Consider using init containers for dependency checks</li>
+                            <li>Create readiness/liveness probes for worker health monitoring</li>
+                            <li>Implement graceful shutdown with preStop hooks</li>
+                            <li>Understand the K8s lifecyle - and how it interacts with Celery - this is esp important if you are dong lot of scale-up and down</li>
+                            <li>Consider the differences between running celery as main process and as child process for sh</li>
+                        </ul>
+                    </li>
+                    <li><strong>Traditional Deployment</strong> - Managing Celery outside containers
+                        <ul>
+                            <li>Use process managers like Supervisord, systemd, or Circus</li>
+                            <li>Implement proper logging and rotation</li>
+                            <li>Configure automatic restart on failure</li>
+                            <li>Consider using Fabric or Ansible for deployment automation</li>
+                        </ul>
+                    </li>
+                    <li><strong>Auto-scaling</strong> - Dynamically adjust worker count
+                        <ul>
+                            <li>In K8s: Horizontal Pod Autoscaler based on queue metrics</li>
+                            <li>In traditional: Use Celery's native autoscale or custom scripts</li>
+                            <li>Consider scaling based on queue depth rather than system metrics</li>
+                        </ul>
+                    </li>
+                    <li><strong>Celery Beat</strong> - Reliable scheduled task execution
+                        <ul>
+                            <li>Run only one <a href="https://docs.celeryq.dev/en/stable/userguide/periodic-tasks.html" target="_blank">beat instance</a> to prevent duplicate scheduled tasks</li>
+                            <li>Use <a href="https://docs.celeryq.dev/en/stable/userguide/periodic-tasks.html#using-custom-scheduler-classes" target="_blank">database scheduler</a> for better reliability in distributed environments</li>
+                            <li>Include timezone awareness in schedule definitions</li>
+                            <li>Consider handling scheduler failure with monitoring and alerts</li>
+                        </ul>
+                    </li>
+                </ol>
+
+                <h3>Monitoring & Operational Excellence</h3>
+                <ol>
+                    <li><strong>Health Checks</strong> - Ensure system components are functioning
+                        <ul>
+                            <li>Implement worker health checks (ping/status endpoints)</li>
+                            <li>Monitor broker and result backend connectivity</li>
+                            <li>Create scheduled test tasks to verify end-to-end processing</li>
+                        </ul>
+                    </li>
+                    <li><strong>Visibility & Metrics</strong> - Track system performance
+                        <ul>
+                            <li>Monitor queue length and growth rates</li>
+                            <li>Track worker process counts and states</li>
+                            <li>Measure task execution times (p50, p95, p99)</li>
+                            <li>Set up Flower, Prometheus, or other monitoring tools - if needed.</li>
+                        </ul>
+                    </li>
+                    <li><strong>Resource Management</strong> - Prevent resource exhaustion
+                        <ul>
+                            <li>Monitor memory growth to detect leaks in long-running workers</li>
+                            <li>Implement worker recycling after N tasks to manage memory fragmentation</li>
+                            <li>Set appropriate concurrency limits based on available resources</li>
+                            <li>Consider using <a href="https://docs.celeryq.dev/en/stable/userguide/workers.html#max-tasks-per-child-setting" target="_blank"><code>--max-tasks-per-child</code></a> option to prevent memory leaks (only available in prefork model)</li>
+                        </ul>
+                    </li>
+                    <li><strong>Logging & Debugging</strong> - Facilitate troubleshooting
+                        <ul>
+                            <li>Configure structured logging with correlation IDs</li>
+                            <li>Include task parameters and results in debug logs</li>
+                            <li>Implement task-specific timing metrics</li>
+                            <li>Consider using APM tools for distributed tracing</li>
+                        </ul>
+                    </li>
+                    <li><strong>Alerting</strong> - Proactively detect issues
+                        <ul>
+                            <li>Alert on queue depth exceeding thresholds</li>
+                            <li>Monitor worker count dropping below expected levels</li>
+                            <li>Track tasks that exceed expected execution times</li>
+                            <li>Set up alerts for repeated task failures</li>
+                        </ul>
+                    </li>
+                </ol>
+
+                <h3>Common Pitfalls & Solutions</h3>
+                <ol>
+                    <li><strong>Memory Leaks</strong> - Preventing resource exhaustion
+                        <ul>
+                            <li>Use <code>--max-tasks-per-child</code> to recycle workers periodically</li>
+                            <li>Be cautious with global variables that accumulate data</li>
+                            <li>Watch for libraries that cache data without bounds</li>
+                            <li>Consider memory profiling for persistent issues</li>
+                        </ul>
+                    </li>
+                    <li><strong>Task Timeouts</strong> - Managing execution duration
+                        <ul>
+                            <li>Configure both soft and hard time limits</li>
+                            <li>Implement graceful handling of SoftTimeLimitExceeded</li>
+                            <li>Be aware of broker visibility timeout settings</li>
+                        </ul>
+                    </li>
+                </ol>
+
+                <h3>Additional Resources</h3>
+                <ul class="resource-links">
+                    <li><a href="https://docs.celeryq.dev/en/stable/" target="_blank">Official Celery Documentation</a></li>
+                    <li><a href="https://docs.celeryq.dev/en/stable/userguide/monitoring.html" target="_blank">Celery Monitoring Guide</a></li>
+                    <li><a href="https://docs.celeryq.dev/en/stable/userguide/configuration.html" target="_blank">Configuration and Defaults</a></li>
+                    <li><a href="https://flower.readthedocs.io/en/latest/" target="_blank">Flower: Celery Monitoring Tool</a></li>
+                </ul>
+
+                <div class="key-points" style="margin-top: 40px;">
+                    <div class="key-point">
+                        <div class="key-point-icon">
+                            <i class="fas fa-tasks"></i>
+                        </div>
+                        <h3>Robust Design</h3>
+                        <p>Implement idempotent, resilient tasks that can safely handle retries and failures</p>
+                    </div>
+                    <div class="key-point">
+                        <div class="key-point-icon">
+                            <i class="fas fa-cogs"></i>
+                        </div>
+                        <h3>Optimized Configuration</h3>
+                        <p>Fine-tune Celery settings based on workload characteristics and reliability requirements</p>
+                    </div>
+                    <div class="key-point">
+                        <div class="key-point-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h3>Comprehensive Monitoring</h3>
+                        <p>Implement thorough visibility into queue depths, worker health, and task performance</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-links">
+                    <a href="../index.html#about">About</a>
+                    <a href="../index.html#projects">Projects</a>
+                    <a href="../index.html#writings">Writings</a>
+                </div>
+                <p class="copyright">&copy; 2025 Kush. All Rights Reserved.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
