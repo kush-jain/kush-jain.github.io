@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Understanding PostgreSQL Buffers in Query Execution Plans">
+    <title>PostgreSQL Buffers Explained | Kush Jain</title>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+    <!-- Header Section -->
+    <header>
+        <div class="container">
+            <div class="profile-container">
+                <h1 class="profile-name">Understanding Buffers in PostgreSQL</h1>
+                <p class="profile-title">A guide to interpreting buffer usage in query plans</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav>
+        <div class="container">
+            <ul class="nav-links">
+                <li><a href="../index.html#about">About</a></li>
+                <li><a href="../index.html#projects">Projects</a></li>
+                <li><a href="../index.html#writings">Writings</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Content Section -->
+    <section>
+        <div class="container">
+            <div class="checklist-content">
+                <h2 class="section-title">PostgreSQL Buffer Management</h2>
+
+                <div class="intro-text">
+                    <p>In PostgreSQL, <strong>buffers</strong> represent how the database accesses data pages — whether from <strong>RAM (cache)</strong> or <strong>disk</strong> — during query execution.</p>
+                    <p>Every table, index, or temporary result set is stored in <strong>8KB pages</strong>. When PostgreSQL needs data, it <strong>doesn't read the whole table or index</strong> — it reads <strong>pages</strong> into memory.</p>
+                </div>
+
+                <h3>Types of Buffers</h3>
+                <p>PostgreSQL tracks buffer usage in four categories:</p>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Buffer Type</th>
+                            <th>What It Means</th>
+                            <th>Example Node</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>shared hit</strong></td>
+                            <td>Page fetched from <strong>shared memory cache</strong> (fastest)</td>
+                            <td>Index Scan, Sequential Scan</td>
+                        </tr>
+                        <tr>
+                            <td><strong>shared read</strong></td>
+                            <td>Page read from <strong>disk into cache</strong> (slower)</td>
+                            <td>Seq Scan, Bitmap Heap Scan</td>
+                        </tr>
+                        <tr>
+                            <td><strong>temp read</strong></td>
+                            <td>Page read from <strong>temporary files</strong> (spilled to disk)</td>
+                            <td>Sort, Hash Join</td>
+                        </tr>
+                        <tr>
+                            <td><strong>temp written</strong></td>
+                            <td>Page written to <strong>temporary files</strong> (spilled to disk)</td>
+                            <td>Sort, Hash Join</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>How Buffers Work</h3>
+                <ol>
+                    <li>When PostgreSQL reads a page:
+                        <ul>
+                            <li>It <strong>first checks the shared buffer cache</strong>.</li>
+                            <li>If the page is there → <strong>shared hit</strong>.</li>
+                            <li>If not → PostgreSQL <strong>reads from disk into cache</strong> → <strong>shared read</strong>.</li>
+                        </ul>
+                    </li>
+                    <li>When sorting or joining large datasets:
+                        <ul>
+                            <li>If the result fits into memory → All data stays in <strong>RAM</strong>.</li>
+                            <li>If not → Data is <strong>written to temp files</strong> on disk → <strong>temp written</strong>.</li>
+                        </ul>
+                    </li>
+                </ol>
+
+                <h3>What Do Buffers Look Like in <code>EXPLAIN ANALYZE</code>?</h3>
+                <p>Example:</p>
+                <pre><code>EXPLAIN (ANALYZE, BUFFERS) SELECT * FROM contact WHERE cured_id = 123;</code></pre>
+
+                <p>Output:</p>
+                <pre><code>Seq Scan on contact  (cost=0.00..1000.00 rows=100 width=32) (actual time=0.050..1.200 rows=100 loops=1)
+Buffers: shared hit=10 shared read=20</code></pre>
+
+                <p>How to Read It:</p>
+                <ul>
+                    <li><strong>shared hit=10</strong> → 10 pages came from the cache (fast 🔥).</li>
+                    <li><strong>shared read=20</strong> → 20 pages had to be read from disk (slow ❄️).</li>
+                    <li>No <strong>temp read</strong> or <strong>temp written</strong> → The query didn't spill to disk.</li>
+                </ul>
+
+                <pre><code>Buffers: shared hit=5 read=34074 I/O Timings: shared read=185.508</code></pre>
+
+                <p>What does this mean?</p>
+                <ul>
+                    <li><strong>shared hit=5</strong>: Only 5 blocks were already in memory.</li>
+                    <li><strong>read=34074</strong>: A massive number of pages (34,074) had to be fetched from disk into memory.</li>
+                    <li><strong>I/O Timings: 185.508 ms</strong> confirms that reading those 34,074 blocks took <strong>185.5 ms</strong>.</li>
+                </ul>
+
+                <p>If you're seeing a large number of <strong>shared read</strong> buffers, the table is either:</p>
+                <ul>
+                    <li><strong>Cold cache</strong>: Data wasn't recently accessed.</li>
+                    <li><strong>Large dataset</strong>: The table is too big to fit entirely in memory.</li>
+                    <li><strong>Missing Index</strong>: Sequential scans will trigger more disk reads than indexed access.</li>
+                </ul>
+
+                <pre><code>Buffers: shared hit=2 read=34465, temp written=1940 I/O Timings: shared read=86.912, temp write=23.850</code></pre>
+
+                <ul>
+                    <li><strong>shared hit=2 read=34465</strong>: PostgreSQL scanned the <code>contact</code> table almost entirely from disk.</li>
+                    <li><strong>temp written=1940</strong>: PostgreSQL <strong>spilled</strong> 1940 pages to temporary files on disk — likely because the hash table couldn't fit entirely in memory (<strong>Hash Batches: 4</strong> confirms this).</li>
+                    <li><strong>temp write</strong> means that the <strong>work_mem</strong> setting was too low to fit all hash buckets in memory.</li>
+                </ul>
+
+                <h3>Why Do Buffers Matter?</h3>
+                <p>They show the <strong>real I/O pressure</strong> of your query.</p>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Observation</th>
+                            <th>What It Means</th>
+                            <th>Fix</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>High <strong>shared read</strong></td>
+                            <td>Cold cache or large table scan</td>
+                            <td>Add index, preload data</td>
+                        </tr>
+                        <tr>
+                            <td>High <strong>temp read/written</strong></td>
+                            <td>Query spills to disk</td>
+                            <td>Increase <code>work_mem</code>, optimize joins</td>
+                        </tr>
+                        <tr>
+                            <td>Low <strong>shared hit</strong> + High <strong>shared read</strong></td>
+                            <td>Poor cache usage</td>
+                            <td>Tune <code>effective_cache_size</code>, index choice</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>Some More examples</h3>
+
+                <h4>Example 1: With just Hash node + Sequential Scan</h4>
+
+                <pre><code>->  Hash  (cost=37069.47..37069.47 rows=260247 width=61) (actual time=279.698..279.700 rows=260377 loops=1)
+      Output: co.contact_id, co.cured_id
+      Buckets: 131072  Batches: 4  Memory Usage: 6999kB
+      Buffers: shared hit=2 read=34465, temp written=1940
+      I/O Timings: shared read=86.912, temp write=23.850
+      ->  Seq Scan on public.contact co  (cost=0.00..37069.47 rows=260247 width=61) (actual time=0.037..195.321 rows=260377 loops=1)
+            Output: co.contact_id, co.cured_id
+            Buffers: shared hit=2 read=34465
+            I/O Timings: shared read=86.912</code></pre>
+
+                <p>When PostgreSQL performs a <strong>Hash Join</strong>, the process is split into two main steps:</p>
+
+                <ol>
+                    <li><strong>Build Phase (Hash Node)</strong>
+                        <ul>
+                            <li>The <strong>Hash Node</strong> takes input from the child node (in this case, the <strong>Seq Scan on contact</strong>).</li>
+                            <li>It reads all the rows from the sequential scan and <strong>stores them in memory (or temporary files if memory isn't enough)</strong> to build the hash table.</li>
+                        </ul>
+                    </li>
+                    <li><strong>Probe Phase (Hash Join Node)</strong>
+                        <ul>
+                            <li>The parent <strong>Hash Join</strong> node uses the hash table to find matching rows from the other input (typically the smaller dataset or filtered CTE).</li>
+                            <li>This phase doesn't access any new buffers — it only works with the hash table built in memory.</li>
+                        </ul>
+                    </li>
+                </ol>
+
+                <p>The <strong>Hash Node</strong> reports the same buffer stats as the <strong>Seq Scan</strong> underneath it - that's because the <strong>Hash Node</strong> <strong>inherits the buffer usage</strong> of its input node.</p>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Node</th>
+                            <th>Buffers</th>
+                            <th>Meaning</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Seq Scan</td>
+                            <td><code>read=34465</code></td>
+                            <td>Disk pages read during sequential scan</td>
+                        </tr>
+                        <tr>
+                            <td>Hash</td>
+                            <td><code>read=34465</code></td>
+                            <td>Same as Seq Scan — inherited buffers</td>
+                        </tr>
+                        <tr>
+                            <td>Hash Join</td>
+                            <td>No extra buffers</td>
+                            <td>Only works with in-memory hash table</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <p><strong>What You Should Look For</strong></p>
+                <ul>
+                    <li>If the <strong>Hash Node</strong> reports <strong>more buffers</strong> than the child <strong>Seq Scan</strong>, it means the hash table <strong>spilled to disk multiple times</strong>.</li>
+                    <li>If the <strong>Hash Join</strong> node itself reports buffers, something strange is happening — usually due to nested subqueries.</li>
+                </ul>
+
+                <p>The <strong>I/O timing</strong> is only counted <strong>once</strong> — at the <strong>Seq Scan</strong> level — because that's the point where PostgreSQL physically reads the data from disk into shared buffers.</p>
+
+                <p>Here's how it works:</p>
+                <ol>
+                    <li><strong>Seq Scan</strong> reads data from disk into buffers → Reports <code>read=34465</code> with <strong>I/O timings</strong>.</li>
+                    <li><strong>Hash Node</strong> inherits those exact buffers but <strong>does not trigger another I/O</strong> — it just processes data already in memory.</li>
+                    <li><strong>Hash Join Node</strong> works entirely with the in-memory hash table — no I/O happens here either.</li>
+                </ol>
+
+                <p>The <strong><code>temp written=1940</code></strong> at the <strong>Hash</strong> node indicates that <strong>PostgreSQL spilled hash table data to disk</strong> because the entire hash table couldn't fit into memory.</p>
+
+                <p><strong>Why Did This Happen?</strong></p>
+                <ul>
+                    <li>The <strong>Seq Scan</strong> only reads data and sends it up to the parent node.</li>
+                    <li>The <strong>Hash</strong> node builds the hash table in memory.</li>
+                    <li>If the hash table size exceeds <strong>work_mem</strong> (your PostgreSQL setting for per-operation memory), PostgreSQL <strong>spills excess data to temporary files</strong> on disk.</li>
+                </ul>
+
+                <p><strong>How to Confirm?</strong></p>
+                <p>In the plan, you can see:</p>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Node</th>
+                            <th>Buffers</th>
+                            <th>Temp Writes</th>
+                            <th>Memory Usage</th>
+                            <th>Comment</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Seq Scan</td>
+                            <td>34465</td>
+                            <td>0</td>
+                            <td>N/A</td>
+                            <td>Just reading data from disk</td>
+                        </tr>
+                        <tr>
+                            <td>Hash</td>
+                            <td>34465</td>
+                            <td>1940</td>
+                            <td>6999kB</td>
+                            <td>Built hash table, spilled to disk</td>
+                        </tr>
+                        <tr>
+                            <td>Hash Join</td>
+                            <td>34465</td>
+                            <td>1940</td>
+                            <td>N/A</td>
+                            <td>Joins data, uses hashed result</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h4>Example 2: Hash Join Node</h4>
+
+                <pre><code>Hash Join  (cost=43118.56..46278.81 rows=10000 width=57) (actual time=1371.145..1419.124 rows=10000 loops=1)
+    Output: fe.event_timestamp, fe.send_id, co.contact_id
+    Inner Unique: true
+    Hash Cond: (fe.cured_id = co.cured_id)
+    Buffers: shared hit=7 read=68539, temp read=1989 written=1989
+    I/O Timings: shared read=272.420, temp read=4.852 write=24.581
+    ->  CTE Scan on filtered_events fe  (cost=0.00..200.00 rows=10000 width=28) (actual time=1090.973..1097.343 rows=10000 loops=1)
+          Output: fe.event_timestamp, fe.cured_id, fe.send_id
+          Buffers: shared hit=5 read=34074
+          I/O Timings: shared read=185.508
+    ->  Hash  (cost=37069.47..37069.47 rows=260247 width=61) (actual time=279.698..279.700 rows=260377 loops=1)
+          Output: co.contact_id, co.cured_id
+          Buckets: 131072  Batches: 4  Memory Usage: 6999kB
+          Buffers: shared hit=2 read=34465, temp written=1940
+          I/O Timings: shared read=86.912, temp write=23.850
+          ->  Seq Scan on public.contact co  (cost=0.00..37069.47 rows=260247 width=61) (actual time=0.037..195.321 rows=260377 loops=1)
+                Output: co.contact_id, co.cured_id
+                Buffers: shared hit=2 read=34465
+                I/O Timings: shared read=86.912</code></pre>
+
+                <p>The <strong>temp_reads</strong> and <strong>temp_writes</strong> at the <strong>Hash Join</strong> node indicate that the <strong>join operation itself spilled to disk</strong>.</p>
+
+                <p><strong>Why Does This Happen?</strong></p>
+                <p>In PostgreSQL, <strong>Hash Join</strong> works like this:</p>
+                <ol>
+                    <li>The <strong>Hash</strong> node builds an in-memory hash table from the smaller input (right side).</li>
+                    <li>The <strong>CTE Scan</strong> (or any left-side input) streams rows and <strong>probes</strong> the hash table for matches.</li>
+                    <li>If either input exceeds <strong>work_mem</strong>, PostgreSQL <strong>spills excess data to temporary files</strong> on disk.</li>
+                    <li>Both <strong>hash table</strong> and <strong>join batches</strong> can spill.</li>
+                </ol>
+
+                <p><strong>How to Detect the Spill?</strong></p>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Node</th>
+                            <th>Buffers</th>
+                            <th>Temp Writes</th>
+                            <th>Temp Reads</th>
+                            <th>Why?</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Hash</td>
+                            <td>34465</td>
+                            <td>1940</td>
+                            <td>0</td>
+                            <td>Hash table spilled to disk</td>
+                        </tr>
+                        <tr>
+                            <td>CTE Scan</td>
+                            <td>34074</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>Sequential scan from CTE</td>
+                        </tr>
+                        <tr>
+                            <td>Hash Join</td>
+                            <td>34465 + 34074</td>
+                            <td>1940</td>
+                            <td>1940</td>
+                            <td>Join batches spilled to disk</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <p><strong>What Do Temp Reads and Temp Writes Mean?</strong></p>
+                <ul>
+                    <li><strong>Temp Writes</strong>: When the hash join creates batches that can't fit into memory, it writes them to disk.</li>
+                    <li><strong>Temp Reads</strong>: When probing those batches, PostgreSQL reads them back into memory.</li>
+                </ul>
+
+                <p>Every <strong>temp_write + temp_read</strong> cycle means:</p>
+                <ol>
+                    <li>Data is written to disk.</li>
+                    <li>Data is read back into memory.</li>
+                    <li>The operating system's page cache or PostgreSQL's buffer cache <strong>cannot help</strong> — these are pure disk I/O operations.</li>
+                </ol>
+
+                <p><strong>Probing Buffers</strong></p>
+                <p>As you might notice, Hash Join Buffers are not 1940, but 1949.
+                This is due to:</p>
+                <ul>
+                    <li>The <strong>Hash</strong> node only reports the buffers used for building the hash table.</li>
+                    <li>The <strong>Hash Join</strong> node, however, reports <strong>both</strong>:
+                        <ul>
+                            <li>Buffers used by the hash table (from the <strong>Hash</strong> node).</li>
+                            <li>Buffers used for <strong>probing</strong> the hash table during the join.</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <p><strong>Working through example</strong></p>
+                <p>The outer table is <strong>probing</strong> the hash table to find matching rows — like asking: <em>"Does this row have a match in the hash table?"</em></p>
+                <ul>
+                    <li>The <strong>contact</strong> table was hashed (inner side).</li>
+                    <li>The <strong>filtered_events</strong> CTE was probed (outer side).</li>
+                    <li>When the <strong>filtered_events</strong> rows were scanned, PostgreSQL:
+                        <ul>
+                            <li>Calculated the hash key for each row's <code>cured_id</code>.</li>
+                            <li>Checked if that key existed in the hash table.</li>
+                            <li>If the hash table was spilled to disk, <strong>probing could also generate temporary buffers</strong> — which is why you're seeing <strong>temp_reads</strong> and <strong>extra temp buffers</strong>.</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <h3>Using Buffer Information for Query Optimization</h3>
+                <p>Now that you understand what buffer statistics tell you, here are some practical ways to use this information:</p>
+
+                <ol>
+                    <li><strong>Identify missing indexes</strong>
+                        <ul>
+                            <li>High <strong>shared read</strong> during filtering operations often points to missing indexes</li>
+                            <li>Compare buffer usage between sequential scans and index scans on the same table</li>
+                        </ul>
+                    </li>
+                    <li><strong>Diagnose memory configuration issues</strong>
+                        <ul>
+                            <li>Consistent <strong>temp writes</strong> across multiple queries suggests insufficient <code>work_mem</code></li>
+                            <li>Low <strong>shared hit</strong> ratio may indicate your <code>shared_buffers</code> is too small</li>
+                        </ul>
+                    </li>
+                    <li><strong>Optimize query structure</strong>
+                        <ul>
+                            <li>If large tables show high buffer usage early in the plan, add filters before joins</li>
+                            <li>For complex joins with high temp buffer usage, consider materializing intermediate results</li>
+                        </ul>
+                    </li>
+                </ol>
+
+                <h3>Summary</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Buffer Type</th>
+                            <th>Why It Happens</th>
+                            <th>Performance Impact</th>
+                            <th>How to Optimize</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>shared hit</strong></td>
+                            <td>Data already cached in RAM</td>
+                            <td>🔥 Fastest</td>
+                            <td>No action needed (PostgreSQL is working efficiently)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>shared read</strong></td>
+                            <td>Data fetched from disk into cache</td>
+                            <td>❄️ Slower</td>
+                            <td>
+                                - Add <strong>Indexes</strong> <br>
+                                - Tune <strong>effective_cache_size</strong> <br>
+                                - Use <strong>Bitmap Index Scan</strong> where possible
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>temp written</strong></td>
+                            <td>Hash table or Sort spilled to disk (due to <strong>work_mem</strong> limit)</td>
+                            <td>🐢 Very Slow</td>
+                            <td>
+                                - Increase <strong>work_mem</strong> <br>
+                                - Optimize joins (filter rows earlier) <br>
+                                - Use <strong>HashAggregate</strong> instead of Sort
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>temp read</strong></td>
+                            <td>Reading back spilled data during hash join or sort</td>
+                            <td>🐢 Very Slow</td>
+                            <td>Same as above — plus ensure <strong>hash_batches</strong> is low (smaller batches fit in memory)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Probing Buffers</strong></td>
+                            <td>Hash Join reads from hash table (possibly from temp files)</td>
+                            <td>🐢 Slow if spilled</td>
+                            <td>
+                                - Increase <strong>work_mem</strong> <br>
+                                - Filter outer table earlier <br>
+                                - Use <strong>smaller join keys</strong>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <p><strong>Golden Rule</strong></p>
+                <ul>
+                    <li>High <strong>shared hit</strong> = Good</li>
+                    <li>High <strong>shared read</strong> = Cache Warmup Needed (or Index Missing)</li>
+                    <li><strong>Temp writes & reads</strong> = Immediate signal to <strong>increase work_mem</strong> or filter data earlier</li>
+                </ul>
+
+                <h3>Additional Resources</h3>
+                <ul class="resource-links">
+                    <li><a href="https://www.postgresql.org/docs/current/using-explain.html" target="_blank">PostgreSQL EXPLAIN Documentation</a></li>
+                    <li><a href="https://www.postgresql.org/docs/current/runtime-config-resource.html" target="_blank">PostgreSQL Memory Configuration</a></li>
+                    <li><a href="https://www.postgresql.org/docs/current/monitoring-stats.html" target="_blank">PostgreSQL Statistics Monitoring</a></li>
+                </ul>
+            </div>
+            <div class="key-points" style="margin-top: 40px;">
+                <div class="key-point">
+                    <div class="key-point-icon">
+                        <i class="fas fa-memory"></i>
+                    </div>
+                    <h3>Buffer Types</h3>
+                    <p>Understand the four buffer types: shared hit, shared read, temp read, and temp written</p>
+                </div>
+                <div class="key-point">
+                    <div class="key-point-icon">
+                        <i class="fas fa-database"></i>
+                    </div>
+                    <h3>Page Management</h3>
+                    <p>PostgreSQL loads 8KB pages from disk to memory as needed rather than loading entire tables</p>
+                </div>
+                <div class="key-point">
+                    <div class="key-point-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3>Performance Analysis</h3>
+                    <p>Use EXPLAIN with BUFFERS to see how your query interacts with the database cache</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-links">
+                    <a href="../index.html#about">About</a>
+                    <a href="../index.html#projects">Projects</a>
+                    <a href="../index.html#writings">Writings</a>
+                </div>
+                <p class="copyright">&copy; 2025 Kush. All Rights Reserved.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

@@ -93,7 +93,7 @@ header {
     transition: color 0.3s ease;
 }
 
-.social-links a:hover {
+social-links a:hover {
     color: var(--primary-color);
 }
 
@@ -385,6 +385,43 @@ textarea {
     resize: vertical;
 }
 
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 30px 0;
+    font-size: 0.95rem;
+    box-shadow: var(--box-shadow);
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+}
+
+thead {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+th {
+    padding: 12px 15px;
+    text-align: left;
+    font-weight: 600;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+td {
+    padding: 10px 15px;
+    border-bottom: 1px solid var(--border-color);
+    border: 1px solid var(--border-color);
+}
+
+tbody tr {
+    background-color: white;
+}
+
+tbody tr:nth-child(even) {
+    background-color: var(--light-bg);
+}
+
 button {
     background-color: var(--primary-color);
     color: white;
@@ -459,6 +496,12 @@ footer {
     .container {
         padding: 0 15px;
     }
+
+    table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
 }
 
 @media (max-width: 480px) {
@@ -493,6 +536,36 @@ footer {
 
     body {
       background-color: var(--secondary-color);
+    }
+
+    table {
+        background-color: var(--secondary-color);
+    }
+
+    tbody tr {
+        background-color: var(--secondary-color);
+    }
+
+    tbody tr:nth-child(even) {
+        background-color: #1c2128;
+    }
+
+    td {
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    pre {
+        background-color: #0d1117;
+        border-color: var(--border-color);
+    }
+
+    p code, li code, td code, th code {
+        background-color: #161b22;
+        color: #e6edf3;
+    }
+
+    pre code {
+        color: #e6edf3;
     }
   }
 
@@ -553,4 +626,35 @@ footer {
 
 .resource-links li {
     margin-bottom: 15px;
+}
+
+/* Enhanced Code Block Styling */
+pre {
+    background-color: var(--light-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 15px;
+    margin: 20px 0;
+    overflow-x: auto;
+    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+code {
+    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+}
+
+pre code {
+    display: block;
+    color: var(--text-color);
+}
+
+/* Inline code styling */
+p code, li code, td code, th code {
+    background-color: var(--light-bg);
+    padding: 2px 5px;
+    border-radius: 3px;
+    font-size: 0.9em;
+    border: 1px solid var(--border-color);
 }
