@@ -229,10 +229,14 @@ section:nth-child(even) {
     transform: translateY(-5px);
 }
 
-.project-image {
+.project-image-container {
+    text-align: center;
     width: 100%;
-    height: 200px;
-    object-fit: cover;
+}
+
+.project-image {
+    height: 64px;
+    margin: 20px auto 0 auto;
 }
 
 .project-content {
