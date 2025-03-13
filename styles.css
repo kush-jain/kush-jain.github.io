@@ -388,7 +388,7 @@ textarea {
 table {
     width: 100%;
     border-collapse: collapse;
-    margin: 30px 0;
+    margin: 2rem 0;
     font-size: 0.95rem;
     box-shadow: var(--box-shadow);
     border-radius: 8px;
@@ -402,14 +402,14 @@ thead {
 }
 
 th {
-    padding: 12px 15px;
+    padding: 0.9rem 1.25rem;
     text-align: left;
     font-weight: 600;
     border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 td {
-    padding: 10px 15px;
+    padding: 0.9rem 1.25rem;
     border-bottom: 1px solid var(--border-color);
     border: 1px solid var(--border-color);
 }
@@ -502,6 +502,24 @@ footer {
         overflow-x: auto;
         white-space: nowrap;
     }
+
+    .checklist-content h3 {
+        margin-top: 2.5rem;
+        font-size: 1.4rem;
+    }
+
+    .checklist-content h4 {
+        margin-top: 2rem;
+        font-size: 1.2rem;
+    }
+
+    pre {
+        padding: 1rem;
+    }
+
+    th, td {
+        padding: 0.75rem 1rem;
+    }
 }
 
 @media (max-width: 480px) {
@@ -567,6 +585,23 @@ footer {
     pre code {
         color: #e6edf3;
     }
+
+    .audience-section {
+        background-color: #161b22;
+        border-left-color: #30363d;
+    }
+
+    .audience-section h3 {
+        border-bottom-color: #30363d;
+    }
+
+    .checklist-content .audience-section {
+        border-left-color: #30363d;
+    }
+
+    .checklist-content .audience-section h3 {
+        border-bottom-color: #30363d;
+    }
   }
 
 /* Checklist Content */
@@ -594,9 +629,9 @@ footer {
 
 /* Add more spacing between checklist section headings */
 .checklist-content h3 {
-    margin-top: 50px;
-    margin-bottom: 25px;
-    padding-bottom: 10px;
+    margin-top: 3rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
     border-bottom: 1px solid var(--border-color);
     color: var(--secondary-color);
     font-size: 1.5rem;
@@ -609,7 +644,11 @@ footer {
 
 /* Improve spacing for the intro text */
 .intro-text {
-    margin-bottom: 40px;
+    background-color: rgba(240, 246, 252, 0.5);
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 2.5rem;
+    border-left: 4px solid var(--primary-color);
 }
 
 /* Add spacing between list items in the checklist for better readability */
@@ -633,12 +672,12 @@ pre {
     background-color: var(--light-bg);
     border: 1px solid var(--border-color);
     border-radius: 6px;
-    padding: 15px;
-    margin: 20px 0;
+    padding: 1.25rem;
+    margin: 1.75rem 0;
     overflow-x: auto;
     font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
     font-size: 0.9rem;
-    line-height: 1.5;
+    line-height: 1.6;
 }
 
 code {
@@ -657,4 +696,80 @@ p code, li code, td code, th code {
     border-radius: 3px;
     font-size: 0.9em;
     border: 1px solid var(--border-color);
+}
+
+/* Enhanced Typography and Spacing */
+.checklist-content p {
+    margin-bottom: 1.25rem;
+    line-height: 1.7;
+}
+
+.checklist-content h4 {
+    margin-top: 2.5rem;
+    margin-bottom: 1rem;
+    color: var(--secondary-color);
+    font-size: 1.3rem;
+}
+
+/* Improved List Spacing */
+.checklist-content ul,
+.checklist-content ol {
+    margin-bottom: 1.5rem;
+    padding-left: 2rem;
+}
+
+.checklist-content ul li,
+.checklist-content ol li {
+    margin-bottom: 0.75rem;
+}
+
+.checklist-content ul ul,
+.checklist-content ul ol,
+.checklist-content ol ul,
+.checklist-content ol ol {
+    margin-top: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+/* Reading Time and Content Meta */
+.content-meta {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 2rem;
+    color: #586069;
+    font-size: 0.9rem;
+}
+
+.reading-time {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Intended Audience Section */
+.audience-section {
+    background-color: transparent;
+    border-left: 2px solid var(--border-color);
+    padding: 1rem 1.5rem;
+    margin: 2.5rem 0;
+    border-radius: 0;
+}
+
+.checklist-content .audience-section h3 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--secondary-color);
+    font-size: 1.2rem;
+}
+
+.audience-section ul {
+    margin-bottom: 0.75rem;
+}
+
+.audience-section p:last-child {
+    margin-bottom: 0;
+    font-size: 0.95rem;
+    font-style: italic;
 }

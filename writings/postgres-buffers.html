@@ -37,9 +37,26 @@
             <div class="checklist-content">
                 <h2 class="section-title">PostgreSQL Buffer Management</h2>
 
+                <div class="content-meta">
+                    <div class="reading-time">
+                        <i class="fas fa-clock"></i> <span>Estimated Reading Time: 15 minutes</span>
+                    </div>
+                </div>
+
                 <div class="intro-text">
                     <p>In PostgreSQL, <strong>buffers</strong> represent how the database accesses data pages — whether from <strong>RAM (cache)</strong> or <strong>disk</strong> — during query execution.</p>
                     <p>Every table, index, or temporary result set is stored in <strong>8KB pages</strong>. When PostgreSQL needs data, it <strong>doesn't read the whole table or index</strong> — it reads <strong>pages</strong> into memory.</p>
+                </div>
+
+                <div class="audience-section">
+                    <h3>Intended Audience</h3>
+                    <p>This guide is intended for peeps who:</p>
+                    <ul>
+                        <li>Already understand basic PostgreSQL query execution plans</li>
+                        <li>Are familiar with <code>EXPLAIN</code> and <code>EXPLAIN ANALYZE</code> output</li>
+                        <li>Want to deepen their understanding of PostgreSQL's memory usage patterns</li>
+                    </ul>
+                    <p>If you're new to PostgreSQL query plans, start with <a href="#">PostgreSQL EXPLAIN Basics</a> before diving into buffer analysis.</p>
                 </div>
 
                 <h3>Types of Buffers</h3>
