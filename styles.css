@@ -667,6 +667,19 @@ footer {
     margin-bottom: 15px;
 }
 
+.current-page {
+    opacity: 0.7;
+    cursor: default;
+    pointer-events: none;
+    position: relative;
+    text-decoration: none;
+    border-bottom: 2px solid var(--primary-color);
+}
+
+.current-page:hover {
+    text-decoration: none;
+}
+
 /* Enhanced Code Block Styling */
 pre {
     background-color: var(--light-bg);
