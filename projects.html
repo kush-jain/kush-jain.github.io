@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Kush Jain - Software Developer projects and portfolio">
+    <title>Projects - Kush Jain</title>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Header Section -->
+    <header>
+        <div class="container">
+            <div class="profile-container">
+                <img src="/api/placeholder/150/150" alt="Kush Jain" class="profile-image">
+                <h1 class="profile-name">Kush Jain</h1>
+                <p class="profile-title">Software Developer | Engineering Leader | Get Things Done - With Quality</p>
+                <div class="social-links">
+                    <a href="https://github.com/kush-jain" target="_blank" aria-label="Github Profile">
+                        <i class="fab fa-github"></i>
+                    </a>
+                    <a href="mailto:redbluei@gmail.com" aria-label="Personal email">
+                        <i class="fas fa-envelope"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav>
+        <div class="container">
+            <ul class="nav-links">
+                <li><a href="index.html#about">About</a></li>
+                <li><a href="index.html#projects">Projects</a></li>
+                <li><a href="index.html#writings">Writings</a></li>
+                <li><a href="index.html">Home</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Projects Section -->
+    <section id="projects">
+        <div class="container">
+            <h2 class="section-title">All Projects</h2>
+            <div class="projects-grid">
+                <div class="project-card">
+                    <div class="project-image-container">
+                        <img src="./images/redis.svg" alt="Redis" class="project-image" loading="lazy">
+                    </div>
+                    <div class="project-content">
+                        <h3 class="project-title">Redis</h3>
+                        <p>Created a Redis server capable of reading from RDB, Replication and handling concurrent clients.</p>
+                        <p>Implemented several basic commands including stream support, transactions, arrays etc.</p>
+                        <div class="project-tech">
+                            <span class="tech-tag">Python</span>
+                            <span class="tech-tag">Async</span>
+                            <span class="tech-tag">Redis</span>
+                        </div>
+                        <div class="project-links">
+                            <a href="https://github.com/kush-jain/redis-python" target="_blank">Source Code</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="project-card">
+                    <div class="project-image-container">
+                        <img src="./images/ai.svg" alt="AI" class="project-image" loading="lazy">
+                    </div>
+                    <div class="project-content">
+                        <h3 class="project-title">Shakespeare GPT</h3>
+                        <p>Created a simple AI decoder which is trained on Shakespeare work and then can generate work in bardic style.</p>
+                        <p>Results are then tabulated based on hyperparameter tuning.</p>
+                        <div class="project-tech">
+                            <span class="tech-tag">Python</span>
+                            <span class="tech-tag">LLM</span>
+                        </div>
+                        <div class="project-links">
+                            <a href="https://github.com/kush-jain/gpt-shakespeare" target="_blank">Source Code</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="project-card">
+                    <div class="project-image-container">
+                        <img src="./images/rust.svg" alt="Rust" class="project-image" loading="lazy">
+                    </div>
+                    <div class="project-content">
+                        <h3 class="project-title">HTTP Server in Rust</h3>
+                        <p>Implemented a simple HTTP Server in Rust.</p>
+                        <p>Capable of encoding, file handling and simple requests.</p>
+                        <div class="project-tech">
+                            <span class="tech-tag">HTTP</span>
+                            <span class="tech-tag">Rust</span>
+                        </div>
+                        <div class="project-links">
+                            <a href="https://github.com/kush-jain/http-server-rust" target="_blank">Source Code</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="project-card">
+                    <div class="project-image-container">
+                        <img src="./images/graph.svg" alt="graph" class="project-image" loading="lazy">
+                    </div>
+                    <div class="project-content">
+                        <h3 class="project-title">Automated Load Testing</h3>
+                        <p>Wrote a project which given swagger, automatically writes load test for you</p>
+                        <p>Smart enough to generate resources it needs from swagger before consuming them</p>
+                        <div class="project-tech">
+                            <span class="tech-tag">Javascript</span>
+                            <span class="tech-tag">Artillery</span>
+                            <span class="tech-tag">Metaprogramming</span>
+                            <span class="tech-tag">Graph</span>
+                        </div>
+                        <div class="project-links">
+                            <a href="https://github.com/swagger-atlas/atlas" target="_blank">Source Code</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="project-card">
+                    <div class="project-image-container">
+                        <img src="./images/git.svg" alt="Git" class="project-image" loading="lazy">
+                    </div>
+                    <div class="project-content">
+                        <h3 class="project-title">Git</h3>
+                        <p>Built a Python implementation of Git's internal plumbing commands from scratch.</p>
+                        <p>Implemented core functionality like ls-tree, write-tree, commit-tree, and object inspection.</p>
+                        <div class="project-tech">
+                            <span class="tech-tag">Git</span>
+                            <span class="tech-tag">Python</span>
+                        </div>
+                        <div class="project-links">
+                            <a href="https://github.com/kush-jain/git-python" target="_blank">Source Code</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="project-card">
+                    <div class="project-image-container">
+                        <img src="./images/bash.svg" alt="bash" class="project-image" loading="lazy">
+                    </div>
+                    <div class="project-content">
+                        <h3 class="project-title">Grep implementation</h3>
+                        <p>Developed a custom implementation of the grep utility in Python from scratch.</p>
+                        <p>Supports advanced regex features including quantifiers, capturing groups, alternation, and backtracking.</p>
+                        <div class="project-tech">
+                            <span class="tech-tag">Python</span>
+                            <span class="tech-tag">Grep</span>
+                            <span class="tech-tag">Backtracking</span>
+                        </div>
+                        <div class="project-links">
+                            <a href="https://github.com/kush-jain/grep-python" target="_blank">Source Code</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="social-links">
+                    <a href="https://github.com/kush-jain" target="_blank" aria-label="Github Profile">
+                        <i class="fab fa-github"></i>
+                    </a>
+                    <a href="mailto:redbluei@gmail.com" aria-label="Personal email">
+                        <i class="fas fa-envelope"></i>
+                    </a>
+                </div>
+                <div class="footer-links">
+                    <a href="index.html#about">About</a>
+                    <a href="index.html#projects">Projects</a>
+                    <a href="index.html#writings">Writings</a>
+                    <a href="index.html">Home</a>
+                </div>
+                <p class="copyright">&copy; 2025 Kush. All Rights Reserved.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
