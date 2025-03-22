@@ -2,11 +2,28 @@
 :root {
     --primary-color: #0366d6;
     --secondary-color: #24292e;
+    --background-color: #fff;
     --text-color: #24292e;
     --light-bg: #f6f8fa;
     --border-color: #e1e4e8;
     --hover-color: #0366d6;
     --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    --text-secondary: #586069;
+    --primary-hover: #0256b3;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --primary-color: #58a6ff;
+        --secondary-color: #c9d1d9;
+        --background-color: #0d1117;
+        --text-color: #c9d1d9;
+        --light-bg: #13171e;
+        --border-color: #30363d;
+        --hover-color: #58a6ff;
+        --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        --text-secondary: #8b949e;
+    }
 }
 
 * {
@@ -19,7 +36,7 @@ body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
     line-height: 1.6;
     color: var(--text-color);
-    background-color: #fff;
+    background-color: var(--background-color);
 }
 
 a {
@@ -64,7 +81,7 @@ header {
     height: 150px;
     border-radius: 50%;
     object-fit: cover;
-    border: 3px solid white;
+    border: 3px solid var(--background-color);
     box-shadow: var(--box-shadow);
     margin-bottom: 20px;
 }
@@ -77,7 +94,7 @@ header {
 
 .profile-title {
     font-size: 1.2rem;
-    color: #586069;
+    color: var(--text-secondary);
     margin-bottom: 15px;
 }
 
@@ -85,10 +102,11 @@ header {
     display: flex;
     gap: 15px;
     margin-top: 15px;
+    justify-content: center;
 }
 
 .social-links a {
-    color: #586069;
+    color: var(--text-secondary);
     font-size: 1.2rem;
     transition: color 0.3s ease;
 }
@@ -99,7 +117,7 @@ social-links a:hover {
 
 /* Navigation */
 nav {
-    background-color: white;
+    background-color: var(--background-color);
     padding: 15px 0;
     border-bottom: 1px solid var(--border-color);
     position: sticky;
@@ -192,7 +210,7 @@ section:nth-child(even) {
 .key-point {
     flex: 1 1 250px;
     max-width: 300px;
-    background-color: white;
+    background-color: var(--background-color);
     padding: 25px;
     border-radius: 8px;
     box-shadow: var(--box-shadow);
@@ -223,7 +241,7 @@ section:nth-child(even) {
 }
 
 .project-card {
-    background-color: white;
+    background-color: var(--background-color);
     border-radius: 8px;
     overflow: hidden;
     box-shadow: var(--box-shadow);
@@ -266,7 +284,7 @@ section:nth-child(even) {
     padding: 5px 10px;
     border-radius: 15px;
     font-size: 0.8rem;
-    color: #586069;
+    color: var(--text-secondary);
 }
 
 .project-links {
@@ -286,7 +304,7 @@ section:nth-child(even) {
 .interest-item {
     flex: 1 1 200px;
     max-width: 250px;
-    background-color: white;
+    background-color: var(--background-color);
     padding: 20px;
     border-radius: 8px;
     box-shadow: var(--box-shadow);
@@ -314,7 +332,7 @@ section:nth-child(even) {
 }
 
 .writing-item {
-    background-color: white;
+    background-color: var(--background-color);
     padding: 25px;
     border-radius: 8px;
     box-shadow: var(--box-shadow);
@@ -327,7 +345,7 @@ section:nth-child(even) {
 
 .writing-date {
     font-size: 0.9rem;
-    color: #586069;
+    color: var(--text-secondary);
     margin-bottom: 8px;
 }
 
@@ -347,7 +365,7 @@ section:nth-child(even) {
 .contact-form {
     max-width: 600px;
     margin: 0 auto;
-    background-color: white;
+    background-color: var(--background-color);
     padding: 30px;
     border-radius: 8px;
     box-shadow: var(--box-shadow);
@@ -398,7 +416,7 @@ table {
 
 thead {
     background-color: var(--primary-color);
-    color: white;
+    color: var(--text-color);
 }
 
 th {
@@ -415,7 +433,7 @@ td {
 }
 
 tbody tr {
-    background-color: white;
+    background-color: var(--background-color);
 }
 
 tbody tr:nth-child(even) {
@@ -424,7 +442,7 @@ tbody tr:nth-child(even) {
 
 button {
     background-color: var(--primary-color);
-    color: white;
+    color: var(--text-color);
     border: none;
     padding: 12px 25px;
     border-radius: 4px;
@@ -435,15 +453,16 @@ button {
 }
 
 button:hover {
-    background-color: #0256b3;
+    background-color: var(--primary-hover);
 }
 
 /* Footer */
 footer {
-    background-color: var(--secondary-color);
-    color: white;
+    background-color: var(--light-bg);
+    color: var(--text-secondary);
     padding: 30px 0;
     text-align: center;
+    justify-content: center;
 }
 
 .footer-content {
@@ -456,7 +475,7 @@ footer {
 }
 
 .footer-links a {
-    color: white;
+    color: var(--text-secondary);
     margin: 0 10px;
     opacity: 0.8;
     transition: opacity 0.3s ease;
@@ -541,75 +560,12 @@ footer {
     }
 }
 
-/* For dark mode support */
-@media (prefers-color-scheme: dark) {
-    :root {
-      --primary-color: #58a6ff;
-      --secondary-color: #161b22;
-      --text-color: #c9d1d9;
-      --light-bg: #0d1117;
-      --border-color: #30363d;
-      --hover-color: #58a6ff;
-    }
-
-    body {
-      background-color: var(--secondary-color);
-    }
-
-    table {
-        background-color: var(--secondary-color);
-    }
-
-    tbody tr {
-        background-color: var(--secondary-color);
-    }
-
-    tbody tr:nth-child(even) {
-        background-color: #1c2128;
-    }
-
-    td {
-        border-bottom: 1px solid var(--border-color);
-    }
-
-    pre {
-        background-color: #0d1117;
-        border-color: var(--border-color);
-    }
-
-    p code, li code, td code, th code {
-        background-color: #161b22;
-        color: #e6edf3;
-    }
-
-    pre code {
-        color: #e6edf3;
-    }
-
-    .audience-section {
-        background-color: #161b22;
-        border-left-color: #30363d;
-    }
-
-    .audience-section h3 {
-        border-bottom-color: #30363d;
-    }
-
-    .checklist-content .audience-section {
-        border-left-color: #30363d;
-    }
-
-    .checklist-content .audience-section h3 {
-        border-bottom-color: #30363d;
-    }
-  }
-
 /* Checklist Content */
 .checklist-content {
     max-width: 800px;
     margin: 0 auto;
     padding: 20px;
-    background-color: white;
+    background-color: var(--background-color);
     border-radius: 8px;
     box-shadow: var(--box-shadow);
 }
@@ -749,7 +705,7 @@ p code, li code, td code, th code {
     display: flex;
     justify-content: flex-end;
     margin-bottom: 2rem;
-    color: #586069;
+    color: var(--text-secondary);
     font-size: 0.9rem;
 }
 
