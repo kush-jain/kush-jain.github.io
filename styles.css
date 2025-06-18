@@ -11,6 +11,9 @@
     --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
     --text-secondary: #586069;
     --primary-hover: #0256b3;
+    --card-border: none;
+    --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    --card-hover-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
 }
 
 /* Dark theme - respects system preference unless explicitly overridden */
@@ -26,6 +29,9 @@
         --hover-color: #58a6ff;
         --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
         --text-secondary: #8b949e;
+        --card-border: 1px solid #30363d;
+        --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.05);
+        --card-hover-shadow: 0 8px 20px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1);
     }
 }
 
@@ -41,6 +47,9 @@
     --hover-color: #58a6ff;
     --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
     --text-secondary: #8b949e;
+    --card-border: 1px solid #30363d;
+    --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.05);
+    --card-hover-shadow: 0 8px 20px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1);
 }
 
 * {
@@ -236,13 +245,15 @@ section:nth-child(even) {
     background-color: var(--background-color);
     padding: 25px;
     border-radius: 8px;
-    box-shadow: var(--box-shadow);
+    box-shadow: var(--card-shadow);
+    border: var(--card-border);
     text-align: center;
-    transition: transform 0.3s ease;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .key-point:hover {
     transform: translateY(-5px);
+    box-shadow: var(--card-hover-shadow);
 }
 
 .key-point-icon {
@@ -267,12 +278,14 @@ section:nth-child(even) {
     background-color: var(--background-color);
     border-radius: 8px;
     overflow: hidden;
-    box-shadow: var(--box-shadow);
-    transition: transform 0.3s ease;
+    box-shadow: var(--card-shadow);
+    border: var(--card-border);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .project-card:hover {
     transform: translateY(-5px);
+    box-shadow: var(--card-hover-shadow);
 }
 
 .project-image-container {
@@ -330,13 +343,15 @@ section:nth-child(even) {
     background-color: var(--background-color);
     padding: 20px;
     border-radius: 8px;
-    box-shadow: var(--box-shadow);
+    box-shadow: var(--card-shadow);
+    border: var(--card-border);
     text-align: center;
-    transition: transform 0.3s ease;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .interest-item:hover {
     transform: translateY(-5px);
+    box-shadow: var(--card-hover-shadow);
 }
 
 .interest-icon {
@@ -358,12 +373,14 @@ section:nth-child(even) {
     background-color: var(--background-color);
     padding: 25px;
     border-radius: 8px;
-    box-shadow: var(--box-shadow);
-    transition: transform 0.3s ease;
+    box-shadow: var(--card-shadow);
+    border: var(--card-border);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .writing-item:hover {
     transform: translateY(-5px);
+    box-shadow: var(--card-hover-shadow);
 }
 
 .writing-date {
@@ -391,7 +408,8 @@ section:nth-child(even) {
     background-color: var(--background-color);
     padding: 30px;
     border-radius: 8px;
-    box-shadow: var(--box-shadow);
+    box-shadow: var(--card-shadow);
+    border: var(--card-border);
 }
 
 .form-group {
@@ -590,7 +608,8 @@ footer {
     padding: 20px;
     background-color: var(--background-color);
     border-radius: 8px;
-    box-shadow: var(--box-shadow);
+    box-shadow: var(--card-shadow);
+    border: var(--card-border);
 }
 
 .checklist-content ol {
