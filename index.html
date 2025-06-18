@@ -8,6 +8,16 @@
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
+
+    <!-- FOUC prevention for theme -->
+    <script>
+        (function() {
+          const saved = localStorage.getItem('user-theme');
+          const system = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+          const theme = saved || system;
+          document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
 </head>
 <body>
     <!-- Header Section -->
@@ -31,11 +41,18 @@
     <!-- Navigation -->
     <nav>
         <div class="container">
-            <ul class="nav-links">
-                <li><a href="#about">About</a></li>
-                <li><a href="#projects">Projects</a></li>
-                <li><a href="#writings">Writings</a></li>
-            </ul>
+            <div class="nav-container">
+                <ul class="nav-links">
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#projects">Projects</a></li>
+                    <li><a href="#writings">Writings</a></li>
+                </ul>
+                <div id="theme-toggle" class="theme-switch" tabindex="0" role="button" aria-label="Toggle dark mode">
+                    <span class="theme-icon sun"><i class="fas fa-sun"></i></span>
+                    <span class="theme-thumb"></span>
+                    <span class="theme-icon moon"><i class="fas fa-moon"></i></span>
+                </div>
+            </div>
         </div>
     </nav>
 
@@ -208,5 +225,6 @@
             });
         });
     </script>
+    <script src="js/theme.js"></script>
 </body>
 </html>
