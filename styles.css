@@ -296,6 +296,18 @@ section:nth-child(even) {
 .project-image {
     height: 64px;
     margin: 20px auto 0 auto;
+    transition: filter 0.3s ease;
+}
+
+[data-theme="dark"] .project-image {
+    filter: invert(1);
+}
+
+/* System dark mode support */
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .project-image {
+        filter: invert(1);
+    }
 }
 
 .project-content {
